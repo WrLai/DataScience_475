@@ -1,0 +1,142 @@
+---
+title: "Assignment2 - R"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## R Markdown
+## a read csv
+```{r}
+college <- read.csv("https://scads.eecs.wsu.edu/wp-content/uploads/2017/09/College.csv")
+rownames(college)<-college[,1]
+college<-college[,-1]
+summary(college)
+
+```
+
+## bFind the median cost of books for all schools in this dataset
+## Also, I can find the median directly from the summary of college
+
+
+```{r}
+median(college$Books)
+```
+
+## cScatterplot
+
+```{r}
+data <- data.frame(college$Books, college$Accept)
+pairs(data)
+plot(college$Enroll,college$Accept, col=c("red","blue"))
+```
+
+## dHistograms
+
+```{r}
+hist(college$P.Undergrad, main="P.Undergrad Enrollment", col = c("blue"))
+hist(college$F.Undergrad, main="F.Undergrad Enrollment", col = c("red"))
+
+```
+
+## e Top as the qualitative variable
+```{r}
+Top = rep("No", nrow(college))
+Top[college$Top10perc > 75] = "Yes"
+Top = as.factor(Top)
+college = data.frame(college, Top)
+summary(college$Top)
+plot(college$Top, col = c("yellow", "red"))
+
+```
+I'm not sure what the question is asking by two Top categories (Top10perc & Top25perc? What is the relationship between acceptance rate and the two Top categories?).
+acceptance <- (college$Accept/college$Apps)
+summary(acceptance)
+summary()
+
+
+## f exploring data
+```{r}
+library(plot3D)
+a <- college$Accept/college$Apps
+scatter3D(a, college$Top10perc, college$Top25perc, classLabel=c("Sepal", "Width(cm)"))
+  
+```
+## From this 3d graph I can find the relationship between every 2 variables by either looking at xy plane zy plane or xz plane. I'm just trying this out because I think 3d could express things that 2d graphs can't present. 
+
+## 2 Auto
+
+## Read the data
+```{r}
+auto <- read.csv("https://scads.eecs.wsu.edu/wp-content/uploads/2017/09/Auto.csv", na.strings = "?")
+auto<-auto[]
+auto
+summary(auto)
+
+```
+##  Quantitatives are: Cylinders, displacement, weight, acceleration, mpg
+##  Qualitatives are: horsepower, name, year, origin
+## b summary of each quantitative predictor
+```{r}
+
+range(auto$cylinders)
+sd(auto$cylinders)
+mean(auto$cylinders)
+range(auto$displacement)
+sd(auto$displacement)
+mean(auto$displacement)
+range(auto$weight)
+sd(auto$weight)
+mean(auto$weight)
+range(auto$acceleration)
+sd(auto$acceleration)
+mean(auto$acceleration)
+range(auto$origin)
+sd(auto$origin)
+mean(auto$origin)
+range(auto$mpg)
+sd(auto$mpg)
+summary(auto$horsepower)
+
+```
+
+## c remove 40 - 80
+```{r}
+auto2 = subset(auto[-c(40:80),])
+auto2range <- sapply(auto2[-c(9)],range)
+auto2mean <- sapply(auto2[-c(9)],mean)
+auto2sd <- sapply(auto2[-c(9)],sd)
+auto2range
+auto2mean
+auto2sd
+
+```
+
+## d 
+```{r}
+pairs(auto[-c(9)], main="All pairs")
+with(auto, plot(auto$mpg, auto$cylinders))
+with(auto, plot(auto$mpg, auto$acceleration))
+with(auto, plot(auto$cylinders, auto$year))
+with(auto, plot(auto$displacement, auto$year))
+with(auto, plot(auto$mpg, auto$year))
+with(auto, plot(auto$mpg, auto$weight))
+with(auto, plot(auto$mpg, auto$displacement))
+with(auto, plot(auto$mpg, auto$horsepower))
+
+
+
+```
+
+## e 
+## As I did in d, I plotted everything with mpg, it cleary showed that everything is related to mpg, all of the quantitatives are useful in predicting mpg for example, more horsepower means les mpg, the havier the car is the less the mpg is, and so on. all the other qualitatives aren't as useful as the quantitatives.  
+
+
+
+
+
+
+
