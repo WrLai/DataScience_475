@@ -1,0 +1,296 @@
+---
+title: "Assignment5"
+author: "Weiren Lai"
+date: "10/25/2020"
+output: html_document
+---
+
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(corrplot)
+auto <- read.csv("https://scads.eecs.wsu.edu/wp-content/uploads/2017/09/Auto.csv")
+auto2 <- drop_na(auto)
+
+##auto2 = select(auto2,-9)
+##auto2
+```
+
+### 1a.Perform a multiple linear regression with mpg as the response and all other variables except name as the predictors. Show a printout of the #result (including coefficient, error and t values for each predictor).
+```{r}
+mlr <- lm(mpg ~ . - name, data = auto2)
+summary(mlr)
+```
+### i)Which predictors appear to have a statistically significant relationship to the response,and how do you determine this?
+
+#### We can check the p values with each predictor's t statistic. Thus we can say that besides cylinders, horsepower and acceleration everything else are statistically significant.
+
+### ii) What does the coefficient for the displacement variable suggest, in simple terms?
+
+#### It suggests that the average effect of an increase of 1 displacement is an increase of 2.486e-03 in mpg. 
+
+### 1b.Produce diagnostic plots of the linear regression fit. Comment on any problems you see with the fit. Do the residual plots suggest any unusually large outliers? Does the leverage plot identify any observations with unusually high leverage?
+
+```{r}
+par(mfrow = c(1,1))
+plot(mlr)
+```
+
+#### residuals vs fitted values shows the presence of mild non linearity in the data. residuals vs leverage shows the presence of some outliers and a high leverage point.
+
+### 1c.Fit linear regression models with interaction effects. Do any interactions appear to be statistically significant?
+
+```{r}
+mlr2 <- lm(mpg ~ . - name + horsepower:acceleration, data = auto2)
+summary(mlr2)
+
+mlr3 <- lm(mpg ~ displacement * horsepower + cylinders - year, data = auto2)
+summary(mlr3)
+```
+
+#### it really depends on what I'm inputing with my equation, for example the first interaction effect was not statistically significant, but the second one was. 
+
+
+### 2a.For each predictor, fit a simple linear regression model to predict the response. Include the code, but not the output for all models in your solution.
+
+```{r}
+library(MASS)
+attach(Boston)
+## we have age, black, chas, crim, dis, indus, lstat, medv, nox, ptratio, rad, rm, tax, zn
+
+lrm.age <- lm(crim ~ age)
+#summary(lrm.age)
+
+lrm.black <- lm(crim ~ black)
+#summary(lrm.black)
+
+chas <- as.factor(chas)
+lrm.chas <- lm(crim ~ chas)
+#summary(lrm.chas)
+
+lrm.dis <- lm(crim ~ dis)
+#summary(lrm.dis)
+
+lrm.indus <- lm(crim ~ indus)
+#summary(lrm.indus)
+
+lrm.lstat <- lm(crim ~ lstat)
+#summary(lrm.lstat)
+
+lrm.medv <- lm(crim ~ medv)
+#summary(lrm.medv)
+
+lrm.nox <- lm(crim ~ nox)
+#summary(lrm.nox)
+
+lrm.ptratio <- lm(crim ~ ptratio)
+#summary(lrm.ptratio)
+
+lrm.rad <- lm(crim ~ rad)
+#summary(lrm.rad)
+
+lrm.rm <- lm(crim ~ rm)
+#summary(lrm.rm)
+
+lrm.tax <- lm(crim ~ tax)
+#summary(lrm.tax)
+
+lrm.zn <- lm(crim ~ zn)
+#summary(lrm.zn)
+```
+
+#### 2b.In order to find which predictor is significant, all predictors have a p value less than 0.05 but chas, thus we can say that everything is statistically significant between each predictor and the response but chas. 
+
+### 2c.Fit a multiple regression model to predict the response using all the predictors.Describe your results. For which predictors can we reject the null hypothesis H0 : βj = 0?
+
+```{r}
+lrm.all <- lm(crim ~ ., data = Boston)
+summary(lrm.all)
+
+```
+
+#### From the result, we can reject the null hypothesis for zn, dis, rad, black, and medv.
+
+
+### 2d.How do your results from (a) compare to your results from (c)? Create a plot displaying the univariate regression coefficients from (a) on the x-axis, and the multiple regression coefficients from (c) on the y-axis. That is, each predictor is displayed as a single point in the plot. Its coefficient in a simple linear regression model is shown on the 2 x-axis, and its coefficient estimate in the multiple linear regression model is shown on the y-axis. What does this plot tell you about the various predictors? 
+
+```{r}
+#age, black, chas, crim, dis, indus, lstat, medv, nox, ptratio, rad, rm, tax, zn
+slr.reg <- vector("numeric", 0)
+slr.reg <- c(slr.reg, lrm.age$coefficient[2])
+slr.reg <- c(slr.reg, lrm.black$coefficient[2])
+slr.reg <- c(slr.reg, lrm.chas$coefficient[2])
+slr.reg <- c(slr.reg, lrm.dis$coefficient[2])
+slr.reg <- c(slr.reg, lrm.indus$coefficient[2])
+slr.reg <- c(slr.reg, lrm.lstat$coefficient[2])
+slr.reg <- c(slr.reg, lrm.medv$coefficient[2])
+slr.reg <- c(slr.reg, lrm.nox$coefficient[2])
+slr.reg <- c(slr.reg, lrm.ptratio$coefficient[2])
+slr.reg <- c(slr.reg, lrm.rad$coefficient[2])
+slr.reg <- c(slr.reg, lrm.rm$coefficient[2])
+slr.reg <- c(slr.reg, lrm.tax$coefficient[2])
+slr.reg <- c(slr.reg, lrm.zn$coefficient[2])
+mlr.reg <- vector("numeric", 0)
+mlr.reg <- c(mlr.reg, lrm.all$coefficients)
+mlr.reg <- mlr.reg[-1]
+plot(slr.reg, mlr.reg)
+```
+
+#### Simple and multiple regression coefficients are different because in simple regression the slope term represents the avg effect of an increase in the predictor because it is simple, it only takes in one value. Hoever, in multiple regression the slope term represents the avg effect of an increase in the predictor, while taking other predictors in. 
+
+
+### 2e. Is there evidence of non-linear association between any of the predictors and the response? To answer this question, for each predictor X, fit a model of the form 
+### Y = β0 + β1X + β2X 2 + β3X 3+ ε
+
+
+```{r}
+lrm.age2 <- lm(crim ~ poly(age, 3))
+#summary(lrm.age2)
+
+lrm.black2 <- lm(crim ~ poly(black, 3))
+#summary(lrm.black2)
+
+lrm.dis2 <- lm(crim ~ poly(dis, 3))
+#summary(lrm.dis2)
+
+lrm.indus2 <- lm(crim ~ poly(indus, 3))
+#summary(lrm.indus2)
+
+lrm.lstat2 <- lm(crim ~ poly(lstat, 3))
+#summary(lrm.lstat2)
+
+lrm.medv2 <- lm(crim ~ poly(medv, 3))
+#summary(lrm.medv2)
+
+lrm.nox2 <- lm(crim ~ poly(nox, 3))
+#summarylrm.nox2
+
+lrm.ptratio2 <- lm(crim ~ poly(ptratio, 3))
+#summary(lrm.ptratio2)
+
+lrm.rad2 <- lm(crim ~ poly(rad, 3))
+#summary(lrm.rad2)
+
+lrm.tax2 <- lm(crim ~ poly(tax, 3))
+#summary(lrm.tax2)
+
+lrm.zn2 <- lm(crim ~ poly(zn, 3))
+#summary(lrm.zn2)
+
+```
+#### p values of the predictors: lstat, tax, rad, rm, zn show that the cubic coefficient is not statistically significant. p values of the predictors: age, dis, indus, nox, medv, ptratio show that the adequacy of the cubic fit. p value of black shows that both cubic and quandratic coefficients are not statistically significant. Hence, there is non-linear effect visible. 
+
+### 3a.Estimate the probability that a student who studies for 32 h, has a PSQI score of 12 and has an undergrad GPA of 3.0 gets an A in the class.
+
+#### z = -7 + 0.1*32 + 1*3 + -0.04*12 = -1.28 
+
+#### P(A) = s(-1.28) = 0.2176
+
+#### The probability of getting A is 21.76%.
+
+
+### 3b. How many hours would the student in part (a) need to study to have a 50 % chance of getting an A in the class?
+
+#### z = -7 + 0.1*X + 1*3 + -0.04*12 = -4.48 + 0.1*X
+
+#### we use sigmoid function to find the prob
+
+#### -4.48 + 0.1*X = -ln(2 - 1)
+
+#### X = (-ln(1) + 4.48) * 10
+
+#### X = 4.48 * 10
+
+#### X = 44.8
+
+#### It would require the students in part(a) to study 44.8 hours in order to have a 50% chance to get an A in the class.
+
+### 3c.  How many hours would a student with a 3.0 GPA and a PSQI score of 3 need to study to have a 50 % chance of getting an A in the class? 
+
+#### z = -7 + 0.1*X + 1*3 + -0.04*3
+
+#### z = -4.12 + 0.1*X
+
+#### same sigmoid function applies
+
+#### -4.12 + 0.1X = -ln(2-1)
+
+#### X = (1 + 4.12) * 10
+
+#### X = 41.2
+
+#### It would require a student with a 3.0 GPA and a PSQI score of 3 to study 41.2 hours in order to have a 50% chance of getting A in the classs.
+
+
+### 4a. Tokenization
+
+```{r}
+library(dplyr)
+library(tokenizers)
+library(tidytext)
+library(tidyverse)
+library(tm)
+library(ggplot2)
+
+#temp <- tempfile()
+#download.file("https://scads.eecs.wsu.edu/wp-content/uploads/2017/09/GuardianArticles.zip", temp)
+#data <- read.csv(unz(temp,"GuardianArticles.csv"))
+#unlink(temp)
+
+corpus <- VCorpus(VectorSource(GuardianArticles))
+corpus <- tm_map(corpus, tolower)
+corpus <- tm_map(corpus, removePunctuation)
+corpus <- tm_map(corpus, removeNumbers)
+cleanset <- tm_map(corpus, removeWords, stopwords("english"))
+cleanset <- tm_map(cleanset, stripWhitespace)
+
+cleanset <- tm_map(cleanset, PlainTextDocument)
+
+dtm <- TermDocumentMatrix(cleanset, control = list(minWordLength=c(1,Inf)))
+
+findFreqTerms(dtm, lowfreq = 2)
+
+termFrequency <- rowSums(as.matrix(dtm))
+termFrequency <- subset(termFrequency, termFrequency>= 10)
+#to show how frequent the terms are 
+barplot(termFrequency, las=2, col=rainbow(20))
+
+
+```
+```{r}
+# build and test naive bayes
+library(dplyr)
+library(ggplot2)
+library(psych)
+library(naivebayes)
+library(caret)
+
+#correlationMatrix <- cor(termFrequency[,1:4])
+#print(correlationMatrix)
+#highlyCorrelated <- findCorrelation(correlationMatrix, cutoff=0.5)
+#print(highlyCorrelated)
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
